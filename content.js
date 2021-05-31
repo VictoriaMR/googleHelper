@@ -44,8 +44,6 @@ function loadContentJs() {
 				obj.remove();
 			}
 			initPopPage({action: 'load_js', value: 'crawer/content_page.js', version: res.data.version});
-		} else {
-			alert(res.message);
 		}
 	});
 }

@@ -46,9 +46,18 @@ chrome.runtime.onMessageExternal.addListener(
 );
 //发送请求
 function getApi(url, param, callback, cache_key) {
+	if (param) {
+		param.is_ajax = 1;
+	} else {
+		param = {is_ajax: 1};
+	}
 	$.post(url, param, function(res) {
-		if (cache_key && res.code == 200) {
-			setCache(cache_key, res.data);
+		if (res.code == 200) {
+			if (cache_key) {
+				setCache(cache_key, res.data);
+			}
+		} else {
+			bg_alert(res.message);
 		}
 		if (callback) {
         	callback(res);
