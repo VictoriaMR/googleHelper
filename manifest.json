@@ -18,7 +18,7 @@
     {
       "matches": ["*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://*.admin.cn/*"],
       "js": ["jquery.js","content.js"],
-      "all_frames":false
+      "all_frames": false
     }
   ],
   "permissions": [

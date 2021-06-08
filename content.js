@@ -30,7 +30,10 @@ window.addEventListener('message', function(event) {
 	switch (event.data.type) {
 		case 'reload_page_js':
 			//重载js
-			initPopPage({action: 'loadJs', value: 'googleHelper/crawler_page.js'});
+			initPopPage({action: 'loadJs', value: event.data.value});
+			break;
+		case 'reload_page_css':
+			initPopPage({action: 'loadCss', value: event.data.value});
 			break;
 	}
 }, false);
@@ -48,15 +51,17 @@ function initPopPage(data) {
 			content = document.createElement('script');
 			content.src = url;
 			content.type = 'text/javascript';
+			content.charset = 'utf-8';
 			content.id = data.value.replace('/', '_').replace('.', '_');
 			head.appendChild(content);
 			break;
 		case 'loadCss':
 			head = document.getElementsByTagName('head')[0];
 			url = common_url+data.value+'?version='+data.version;
-			content = document.createElement('script');
+			content = document.createElement('link');
 			content.href = url;
-			content.rel = 'text/javascript';
+			content.rel = 'stylesheet';
+			content.charset = 'utf-8';
 			content.id = data.value.replace('/', '_').replace('.', '_');
 			head.appendChild(content);
 			break;
