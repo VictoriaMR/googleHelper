@@ -1,33 +1,31 @@
 {
-  "name": "数据助手",
-  "version": "1.0.0",
-  "description": "数据助手",
-  "icons" : {
-    "24": "icon.png",
-    "48": "icon.png"
-  },
-  "browser_action": {
-    "default_icon": "icon.png",
-    "default_title": "数据助手",
-    "default_popup": "menu.html"
-  },
-  "background": {
-    "scripts": ["jquery.js","background.js"]
-  },
-  "content_scripts": [
-    {
-      "matches": ["*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://*.admin.cn/*"],
-      "js": ["jquery.js","content.js"],
-      "all_frames": false
-    }
-  ],
-  "permissions": [
-    "tabs",
-    "contentSettings",
-    "*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://*.admin.cn/*"
-  ],
-  "externally_connectable": {
-    "matches": ["*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://*.admin.cn/*"]
-  },
-  "manifest_version": 2
+    "name": "数据助手",
+    "version": "1.0.0",
+    "description": "数据助手",
+    "icons" : {
+        "24": "icon.png",
+        "48": "icon.png"
+    },
+    "browser_action": {
+        "default_icon": "icon.png",
+        "default_title": "数据助手",
+        "default_popup": "menu.html"
+    },
+    "background": {
+        "scripts": ["jquery.js","background.js"]
+    },
+    "content_scripts": [{
+        "matches": ["*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://*.admin.cn/*"],
+        "js": ["jquery.js","content.js"],
+        "all_frames": false
+    }],
+    "permissions": [
+        "tabs",
+        "contentSettings",
+        "*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://*.admin.cn/*"
+    ],
+    "externally_connectable": {
+        "matches": ["*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://*.admin.cn/*"]
+    },
+    "manifest_version": 2
 }
