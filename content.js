@@ -4,7 +4,7 @@ chrome.runtime.sendMessage({action: 'request', value: 'api/getHelperData', cache
 	if (res.code === 200 || res.code === '200') {
 		loadStatic('js', 'helper/init.js', res.data.version);
 	} else {
-		chrome.runtime.sendMessage({action: 'alert', value: res.message});
+		console.log('helper_error: '+res.message);
 	}
 });
 //引入页面静态文件
@@ -15,7 +15,6 @@ function loadStatic(action, value, version) {
 	}
 	chrome.runtime.sendMessage({action: 'getUrl'}, function(res) {
 		if (res.data) {
-			localStorage.setItem('helper_api_url', res.data);
 			let url = res.data+value;
 			if (typeof version !== 'undefined') {
 				url += '?v='+version;

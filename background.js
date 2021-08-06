@@ -19,65 +19,71 @@ function listenerResponse(request, sendResponse) {
 	switch(request.action) {
 		case 'alert':
 			bg_alert(request.value);
-  			break;
-  		case 'getUrl':
-  			sendResponse({code:200, data:api_url, msg:'success'});
-  			break;
-  		case 'getCache':
-  			rst = CACHE.getCache(request.cache_key);
-  			sendResponse({code:200, data:rst, msg:'success'});
-  			break;
-  		case 'setCache':
-  			rst = CACHE.setCache(request.cache_key, request.value, request.expire);
-  			sendResponse({code:200, data:rst, msg:'success'});
-  			break;
-  		case 'delCache':
-  			rst = CACHE.delCache(request.cache_key);
-  			sendResponse({code:200, data:rst, msg:'success'});
-  			break;
+			break;
+		case 'getUrl':
+			sendResponse({code:200, data:api_url, message:'success'});
+			break;
+		case 'getCache':
+			rst = CACHE.getCache(request.cache_key);
+			sendResponse({code:200, data:rst, message:'success'});
+			break;
+		case 'setCache':
+			rst = CACHE.setCache(request.cache_key, request.value, request.expire);
+			sendResponse({code:200, data:rst, message:'success'});
+			break;
+		case 'delCache':
+			rst = CACHE.delCache(request.cache_key);
+			sendResponse({code:200, data:rst, message:'success'});
+			break;
 		case 'request':
 			if (request.cache_key) {
 				rst = CACHE.getCache(request.cache_key);
 				if (rst) {
-					sendResponse({code:200, data:rst, msg:'success'});
+					sendResponse({code:200, data:rst, message:'success'});
 					return false;
 				}
 			}
-			getApi(api_url + request.value, request.param, function(res) {
+			getApi(api_url + request.value, request.param, request.type, request.dataType, function(res) {
 				if (res.code === 200 || res.code === '200') {
 					CACHE.setCache(request.cache_key, res.data, request.expire);
 				}
 				sendResponse(res);
 			});
 			break;
-  	}
+	}
 }
 //发送请求
-function getApi(url, param, callback) {
+function getApi(url, param, type, dataType, callback) {
 	if (!param) {
 		param = {};
 	}
 	param.is_ajax = 1;
+	if (!type) {
+		type = 'POST';
+	}
+	if (!dataType) {
+		dataType = 'JSON';
+	}
 	$.ajax({
-	    url:url,
-	    data:param,
-	    type:'POST',
-	    dataType:'json',
-	    success:function(res) {
+		url: url,
+		data: param,
+		type: type,
+		dataType: dataType,
+		success:function(res) {
 			if (callback) {
-	        	callback(res);
-	        }
-	    },
-	    error:function (jqXHR, textStatus, errorThrown) {
-            if (callback) {
-	        	callback({code:10000, data:'', msg:textStatus});
-	        }
-        }
+				callback(res);
+			}
+		},
+		error:function (jqXHR, textStatus, errorThrown) {
+			if (callback) {
+				callback({code:10000, data:'', message:textStatus+errorThrow});
+			}
+		}
 	});
 }
 //在整个页面中alert
-function bg_alert(msg) {
-	alert(msg);
+function bg_alert(message) {
+	alert(message);
 }
 function getCache(key) {
 	return CACHE.getCache(key);
@@ -101,10 +107,10 @@ const CACHE = {
 		try {
 			if (typeof JSON.parse(data) === 'object') {
 				data = JSON.parse(data);
-	        }
-	    } catch(e) {
-	    	return data;
-        }
+			}
+		} catch(e) {
+			return data;
+		}
 		if (data.expire === '-1' || data.expire === -1) {
 			return data.content;
 		}
