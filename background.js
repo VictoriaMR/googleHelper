@@ -1,3 +1,4 @@
+console.log('触发background.js')
 const api_url = 'https://lmr.admin.cn/';
 const expire_time = 24*60*60; //缓存时间
 //扩展内通信
@@ -18,37 +19,49 @@ chrome.runtime.onMessageExternal.addListener(
 function listenerResponse(request, sendResponse) {
 	switch(request.action) {
 		case 'alert':
-			bg_alert(request.value);
+			bgAlert(request.value);
 			break;
 		case 'getUrl':
-			sendResponse({code:200, data:api_url, message:'success'});
+			sendResponse({code:'200', data:api_url, message:'success'});
 			break;
 		case 'getCache':
-			rst = CACHE.getCache(request.cache_key);
-			sendResponse({code:200, data:rst, message:'success'});
+			rst = getCache(request.cache_key);
+			sendResponse({code:'200', data:rst, message:'success'});
 			break;
 		case 'setCache':
-			rst = CACHE.setCache(request.cache_key, request.value, request.expire);
-			sendResponse({code:200, data:rst, message:'success'});
+			rst = setCache(request.cache_key, request.value, request.expire);
+			sendResponse({code:'200', data:rst, message:'success'});
 			break;
 		case 'delCache':
-			rst = CACHE.delCache(request.cache_key);
-			sendResponse({code:200, data:rst, message:'success'});
+			rst = delCache(request.cache_key);
+			sendResponse({code:'200', data:rst, message:'success'});
 			break;
 		case 'request':
 			if (request.cache_key) {
-				rst = CACHE.getCache(request.cache_key);
+				rst = getCache(request.cache_key);
 				if (rst) {
-					sendResponse({code:200, data:rst, message:'success'});
+					sendResponse({code:'200', data:rst, message:'success'});
 					return false;
 				}
 			}
 			getApi(api_url + request.value, request.param, request.type, request.dataType, function(res) {
-				if (res.code === 200 || res.code === '200') {
-					CACHE.setCache(request.cache_key, res.data, request.expire);
+				if (res.code === '200') {
+					setCache(request.cache_key, res.data, request.expire);
 				}
 				sendResponse(res);
 			});
+			break;
+		case 'initSocket':
+			HELPERSOCKET.init(request.key);
+			sendResponse();
+			break;
+		case 'sotpSocket':
+			HELPERSOCKET.ioLogout(request.key);
+			sendResponse();
+			break;
+		case 'setSocket':
+			HELPERSOCKET.set(request.value);
+			sendResponse();
 			break;
 	}
 }
@@ -76,13 +89,13 @@ function getApi(url, param, type, dataType, callback) {
 		},
 		error:function (jqXHR, textStatus, errorThrown) {
 			if (callback) {
-				callback({code:10000, data:'', message:textStatus+errorThrow});
+				callback({code:'10000', data:'', message:textStatus+errorThrown});
 			}
 		}
 	});
 }
 //在整个页面中alert
-function bg_alert(message) {
+function bgAlert(message) {
 	alert(message);
 }
 function getCache(key) {

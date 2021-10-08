@@ -12,7 +12,7 @@
 		"default_popup": "menu.html"
 	},
 	"background": {
-		"scripts": ["jquery.js","background.js"]
+		"scripts": ["jquery.js","background.js","socket.io.js","socket.js"]
 	},
 	"content_scripts": [{
 		"matches": ["*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://*.admin.cn/*"],
