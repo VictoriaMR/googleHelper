@@ -1,4 +1,3 @@
-console.log('触发background.js')
 const api_url = 'https://lmr.admin.cn/';
 const expire_time = 24*60*60; //缓存时间
 //扩展内通信
