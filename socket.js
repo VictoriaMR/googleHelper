@@ -13,7 +13,7 @@ const HELPERSOCKET = {
 		_this.type = type;
 		_this.ioLoginSign = false;
 		//实例
-		_this.socket = io((config.socket_ssl?'https':'http')+'://'+config.socket_domain+':'+config.socket_port);
+		_this.socket = io(config.socket_domain);
 		//登录
 		_this.socket.on('connect', function(){
 			console.log('服务器链接成功');
@@ -38,6 +38,7 @@ const HELPERSOCKET = {
 				bgAlert('处理请求参数错误');
 				return;
 			}
+			setCache('reload_param_cache', e);
 			//url刷新页面
 			chrome.tabs.query({}, function(tabArray){
 				chrome.tabs.update(tabArray[0].id, { url: e.url });
