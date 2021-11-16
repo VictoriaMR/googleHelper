@@ -1,4 +1,4 @@
-const api_url = 'https://lmr.admin.cn/';
+const api_url = 'https://lmrshop.ml/';
 const expire_time = 24*60*60; //缓存时间
 //扩展内通信
 chrome.runtime.onMessage.addListener(
