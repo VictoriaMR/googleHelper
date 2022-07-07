@@ -21,25 +21,25 @@ function listenerResponse(request, sendResponse) {
 			bgAlert(request.value);
 			break;
 		case 'getUrl':
-			sendResponse({code:'200', data:api_url, message:'success'});
+			sendResponse({code:'200', data:api_url, msg:'success'});
 			break;
 		case 'getCache':
 			rst = getCache(request.cache_key);
-			sendResponse({code:'200', data:rst, message:'success'});
+			sendResponse({code:'200', data:rst, msg:'success'});
 			break;
 		case 'setCache':
 			rst = setCache(request.cache_key, request.value, request.expire);
-			sendResponse({code:'200', data:rst, message:'success'});
+			sendResponse({code:'200', data:rst, msg:'success'});
 			break;
 		case 'delCache':
 			rst = delCache(request.cache_key);
-			sendResponse({code:'200', data:rst, message:'success'});
+			sendResponse({code:'200', data:rst, msg:'success'});
 			break;
 		case 'request':
 			if (request.cache_key) {
 				rst = getCache(request.cache_key);
 				if (rst) {
-					sendResponse({code:'200', data:rst, message:'success'});
+					sendResponse({code:'200', data:rst, msg:'success'});
 					return false;
 				}
 			}
@@ -88,14 +88,14 @@ function getApi(url, param, type, dataType, callback) {
 		},
 		error:function (jqXHR, textStatus, errorThrown) {
 			if (callback) {
-				callback({code:'10000', data:'', message:textStatus+errorThrown});
+				callback({code:'10000', data:'', msg:textStatus+errorThrown});
 			}
 		}
 	});
 }
 //在整个页面中alert
-function bgAlert(message) {
-	alert(message);
+function bgAlert(msg) {
+	alert(msg);
 }
 function getCache(key) {
 	return CACHE.getCache(key);

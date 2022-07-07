@@ -15,17 +15,17 @@
 		"scripts": ["jquery.js","background.js","socket.io.js","socket.js"]
 	},
 	"content_scripts": [{
-		"matches": ["*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://*.admin.cn/*", "*://lmrshop.ml/*"],
+		"matches": ["*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*"],
 		"js": ["jquery.js","content.js"],
 		"all_frames": false
 	}],
 	"permissions": [
 		"tabs",
 		"contentSettings",
-		"*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://*.admin.cn/*", "*://lmrshop.ml/*"
+		"*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://lmrshop.ml/*"
 	],
 	"externally_connectable": {
-		"matches": ["*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://*.admin.cn/*", "*://lmrshop.ml/*"]
+		"matches": ["*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://lmrshop.ml/*"]
 	},
 	"manifest_version": 2
 }
