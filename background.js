@@ -1,17 +1,15 @@
-const api_url = 'https://lmrshop.ml/';
+const api_url = 'https://shop.admin.cn/';
 const expire_time = 24*60*60; //缓存时间
 //扩展内通信
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
 		listenerResponse(request, sendResponse);
-		return true;
 	}
 );
 //外部页面通信
 chrome.runtime.onMessageExternal.addListener(
 	function(request, sender, sendResponse) {
 		listenerResponse(request, sendResponse);
-		return true;
 	}
 );
 //公共处理请求分发方法
@@ -21,34 +19,41 @@ function listenerResponse(request, sendResponse) {
 			bgAlert(request.value);
 			break;
 		case 'getUrl':
-			sendResponse({code:'200', data:api_url, msg:'success'});
+			sendResponse({code:200, data:api_url, msg:'success'});
 			break;
 		case 'getCache':
-			rst = getCache(request.cache_key);
-			sendResponse({code:'200', data:rst, msg:'success'});
+			getCache(request.cache_key, function(rst){
+				sendResponse({code:200, data:rst, msg:'success'});
+			});
 			break;
 		case 'setCache':
-			rst = setCache(request.cache_key, request.value, request.expire);
-			sendResponse({code:'200', data:rst, msg:'success'});
+			setCache(request.cache_key, request.value, request.expire, function(rst) {
+				sendResponse({code:200, data:rst, msg:'success'});
+			});
 			break;
 		case 'delCache':
-			rst = delCache(request.cache_key);
-			sendResponse({code:'200', data:rst, msg:'success'});
+			delCache(request.cache_key, function(rst){
+				sendResponse({code:200, data:rst, msg:'success'});
+			});
 			break;
 		case 'request':
 			if (request.cache_key) {
-				rst = getCache(request.cache_key);
-				if (rst) {
-					sendResponse({code:'200', data:rst, msg:'success'});
-					return false;
-				}
+				getCache(request.cache_key, function(rst){
+					if (rst) {
+						sendResponse({code:200, data:rst, msg:'success'});
+					} else {
+						getApi(api_url + request.value, request.param, request.type, request.dataType, function(res) {
+							if (res.code === 200) {
+								setCache(request.cache_key, res.data, request.expire, function(rst) {
+									sendResponse(res);
+								});
+							} else {
+								sendResponse(res);
+							}
+						});
+					}
+				});
 			}
-			getApi(api_url + request.value, request.param, request.type, request.dataType, function(res) {
-				if (res.code === '200') {
-					setCache(request.cache_key, res.data, request.expire);
-				}
-				sendResponse(res);
-			});
 			break;
 		case 'initSocket':
 			HELPERSOCKET.init(request.key);
@@ -97,42 +102,42 @@ function getApi(url, param, type, dataType, callback) {
 function bgAlert(msg) {
 	alert(msg);
 }
-function getCache(key) {
-	return CACHE.getCache(key);
+function getCache(key, callback) {
+	return CACHE.getCache(key, callback);
 }
-function setCache(key, value, expire) {
-	return CACHE.setCache(key, value, expire);
+function setCache(key, value, expire, callback) {
+	return CACHE.setCache(key, value, expire, callback);
 }
-function delCache(key) {
-	return CACHE.delCache(key);
+function delCache(key, callback) {
+	return CACHE.delCache(key, callback);
 }
 //缓存方法
 const CACHE = {
-	getCache:function(key) {
-		if (!key) {
-			return false;
-		}
-		let data = localStorage.getItem(key);
-		if (!data) {
-			return false;
-		}
-		try {
-			if (typeof JSON.parse(data) === 'object') {
-				data = JSON.parse(data);
+	getCache:function(key, callback) {
+		chrome.storage.local.get(key).then((data) => {
+			if (!data) {
+				callback(false);
+				return false;
 			}
-		} catch(e) {
-			return data;
-		}
-		if (data.expire === '-1' || data.expire === -1) {
-			return data.content;
-		}
-		if (parseInt(data.expire) <= this.getTime()) {
-			this.delCache(key);
-			return false;
-		}
-		return data.content;
+			try {
+				if (typeof JSON.parse(data) === 'object') {
+					data = JSON.parse(data);
+				}
+			} catch(e) {
+				callback(false);
+				return false;
+			}
+			if (data.expire === -1) {
+				callback(data.content);
+			}
+			if (parseInt(data.expire) <= this.getTime()) {
+				this.delCache(key, callback);
+				return false;
+			}
+			callback(data.content);
+		});
 	},
-	setCache:function(key, value, expire) {
+	setCache:function(key, value, expire, callback) {
 		if (!key || !value) {
 			return false;
 		}
@@ -146,10 +151,11 @@ const CACHE = {
 			}
 		}
 		const data = {expire:expire, content:value};
-		localStorage.setItem(key, JSON.stringify(data));
-		return true;
+		chrome.storage.local.set(data).then((rst) => {
+		  	callback(rst);
+		});
 	},
-	delCache:function(key) {
+	delCache:function(key, callback) {
 		if (!key) {
 			return false;
 		}

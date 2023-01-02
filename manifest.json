@@ -1,31 +1,36 @@
 {
-	"name": "数据助手",
-	"version": "1.0.0",
-	"description": "数据助手",
-	"icons" : {
-		"24": "icon.png",
-		"48": "icon.png"
-	},
-	"browser_action": {
+	"manifest_version": 3,
+	"name": "产品数据助手",
+	"version": "3.0",
+	"description": "抓取页面产品信息, 同时修改整理产品",
+	"action": {
 		"default_icon": "icon.png",
 		"default_title": "数据助手",
 		"default_popup": "menu.html"
 	},
+	"icons" : {
+		"24": "icon.png",
+		"48": "icon.png"
+	},
 	"background": {
-		"scripts": ["jquery.js","background.js","socket.io.js","socket.js"]
+		// "service_worker": ["jquery.js","background.js","socket.io.js","socket.js"]
+		"service_worker": "background.js"
 	},
 	"content_scripts": [{
-		"matches": ["*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*"],
-		"js": ["jquery.js","content.js"],
-		"all_frames": false
+		"matches": [
+			"*://*.1688.com/*",
+			"*://*.tmall.com/*",
+			"*://*.taobao.com/*"
+		],
+		"js": [
+			"content.js"
+		]
 	}],
 	"permissions": [
-		"tabs",
-		"contentSettings",
-		"*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://lmrshop.ml/*"
+		"storage",
+		"activeTab",
+		"cookies",
+		"webRequest"
 	],
-	"externally_connectable": {
-		"matches": ["*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*","*://lmrshop.ml/*"]
-	},
-	"manifest_version": 2
+	"host_permissions": ["http://*/*", "https://*/*"]
 }
