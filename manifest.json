@@ -2,28 +2,31 @@
 	"manifest_version": 3,
 	"name": "产品数据助手",
 	"version": "3.0",
-	"description": "抓取页面产品信息, 同时修改整理产品",
+	"description": "供应商产品数据助手",
 	"action": {
-		"default_icon": "icon.png",
-		"default_title": "数据助手",
-		"default_popup": "menu.html"
+		"default_popup": "popup/popup.html",
+		"default_icon": {
+			"16": "images/icon-16.png",
+			"32": "images/icon-32.png",
+			"48": "images/icon-48.png",
+			"128": "images/icon-128.png"
+		}
 	},
 	"icons" : {
-		"24": "icon.png",
-		"48": "icon.png"
+		"16": "images/icon-16.png",
+		"32": "images/icon-32.png",
+		"48": "images/icon-48.png",
+		"128": "images/icon-128.png"
 	},
 	"background": {
-		// "service_worker": ["jquery.js","background.js","socket.io.js","socket.js"]
 		"service_worker": "background.js"
 	},
 	"content_scripts": [{
+		"js": ["scripts/content.js"],
 		"matches": [
 			"*://*.1688.com/*",
 			"*://*.tmall.com/*",
 			"*://*.taobao.com/*"
-		],
-		"js": [
-			"content.js"
 		]
 	}],
 	"permissions": [
@@ -32,5 +35,7 @@
 		"cookies",
 		"webRequest"
 	],
-	"host_permissions": ["http://*/*", "https://*/*"]
+	"host_permissions": [
+		"https://erp.baycheer.cn/*"
+	]
 }
