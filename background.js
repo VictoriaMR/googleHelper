@@ -1,3 +1,4 @@
+new WebSocket("wss://127.0.0.1:10028");
 //扩展内通信
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
