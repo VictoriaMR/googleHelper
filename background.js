@@ -1,23 +1,22 @@
 //扩展内通信
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
-		listenerResponse(request, sendResponse);
+		switch(request.action) {
+			case 'setNxUuid':
+				getCache('uuid', function(uuid){
+					console.log(uuid, 'uuid')
+					if (!uuid) {
+						uuid = randString(32);
+					}
+					setCache('uuid', uuid, -1);
+					console.log(sendResponse, 'sendResponse')
+					sendResponse({code:200, data: uuid, msg:'获取成功'});
+				});
+				break;
+		}
+		return true;
 	}
 );
-function listenerResponse(request, sendResponse) {
-	switch(request.action) {
-		case 'setNxUuid':
-			let uuid = cache.get('uuid');
-			console.log(uuid, 'uuid')
-			// if (!uuid) {
-			// 	uuid = randString(32);
-			// }
-			// cache.set('uuid', uuid, -1);
-			// sendResponse({code:200, data: uuid, msg:'获取成功'});
-			break;
-	}
-}
-
 //生成唯一ID字符串
 function randString(len) {
 	let arr = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
@@ -27,80 +26,33 @@ function randString(len) {
 	}
 	return str;
 }
-
-function async2await(callback, args = []) {
-    return () => {
-        return new Promise((resolve, reject) => {
-            args.push(resolve, reject)
-            callback(...args)
-        })
-    }
-}
-async function cacheGet(key, resolve=()=>{}, reject=()=>{}) {
-	chrome.storage.local.get(key).then((result) => {
-		resolve('123123')
-	});
-}
-
-const cache = {
-    get: async function(key) {
-        return await async2await(cacheGet, [key])()
-    },
-    set: async function(key, value, expire) {
-		if (expire != -1) {
-			expire = this.getTime() + expire;
-		}
-		const data = {expire:expire, content:value};
-        return await async2await(cacheSet, [key, data])()
-    },
-    del: async function(key) {
-        return await async2await(cacheDel, [key])()
-    },
-    clear: async function () {
-        return await async2await(cacheClear)()
-    },
-    getTime: function() {
-		return parseInt(new Date().getTime() / 1000);
-	}
-};
-async function cacheSet(key, value, resolve = () => { }, reject = () => { }) {
-    try {
-        if (!key) {
-            console.error("session key can't null")
-            reject()
-            return false
-        }
-        chrome.storage.local.set({
-            [key]: value,
-        }, function (res) {
-            let error = chrome.runtime.lastError;
-            if (error) {
-                console.warn(JSON.stringify(error));
-                reject(JSON.stringify(error))
-            }
-            resolve(res)
-        })
-    } catch (e) {
-        reject(e)
-    }
-}
-// console.log('here', 'here')
-// let key = 'key';
-// let value = 'value';
-// chrome.storage.local.set({ key: value }).then(() => {
-//   console.log("Value is set to " + value);
-// });
-
-// chrome.storage.local.get(key).then((result) => {
-//   console.log("Value currently is " + result.key);
-// });
+//设置缓存
 function setCache(key, value, expire) {
-
+	if (expire !== -1) {
+		expire = now() + expire;
+	}
+	const data = {expire:expire, content:value};
+	chrome.storage.local.set({[key]:data});
 }
-function getCache(key) {
+//获取缓存
+function getCache(key, callback) {
 	chrome.storage.local.get(key).then(result=>{
-		return result;
+		if (!result[key]) {
+			callback(false);
+		} else if (result[key].expire == -1) {
+			callback(result[key].content);
+		} else if (result[key].expire <= now()) {
+			delCache(key);
+			callback(false);
+		}
 	});
+}
+//删除缓存
+function delCache(key) {
+	chrome.storage.local.remove(key);
+}
+function now() {
+	return parseInt(new Date().getTime() / 1000);
 }
 //api请求
 function getApi(url, param, callback, type) {
