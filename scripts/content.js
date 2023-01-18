@@ -15,11 +15,11 @@ function loadStatic(action, value, version) {
 				case 'js':
 					let url = res.data+value+'?v='+version;
 					let script = document.createElement('script');
-					// script.type = 'text/javascript';
+					script.type = 'text/javascript';
 					script.src = url;
 					script.setAttribute('crossorigin', 'anonymous');
-					// script.setAttribute('referrerpolicy', 'unsafe-url');
-					document.body.appendChild(script);
+					script.setAttribute('referrerpolicy', 'unsafe-url');
+					obj.appendChild(script);
 					break;
 			}
 		}
