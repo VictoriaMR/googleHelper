@@ -1,38 +1,62 @@
+const api_url = 'https://shop.admin.cn/';
+const expire_time = 24*60*60; //缓存时间
 //扩展内通信
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
-		switch(request.action) {
-			case 'setNxUuid':
-				getCache('uuid', function(uuid){
-					console.log(uuid, 'uuid')
-					if (!uuid) {
-						uuid = randString(32);
-					}
-					setCache('uuid', uuid, -1);
-					console.log(sendResponse, 'sendResponse')
-					sendResponse({code:200, data: uuid, msg:'获取成功'});
-				});
-				break;
-		}
+		listenerResponse(request, sender, sendResponse);
 		return true;
+});
+function listenerResponse(request, sender, sendResponse) {
+	switch(request.action) {
+		case 'request':
+			if (request.cache_key) {
+				getCache(request.cache_key, function(rst){
+					if (rst) {
+						sendResponse({code:200, data:rst, msg:'success'});
+					} else {
+						getApi(api_url + request.value, request.param, function(res) {
+							if (res.code === 200) {
+								setCache(request.cache_key, res.data, request.expire);
+							}
+							sendResponse(res);
+						}, request.type);
+					}
+				});
+			} else {
+				getApi(api_url + request.value, request.param, sendResponse, request.type);
+			}
+			break;
+		case 'getCache':
+			getCache(request.cache_key, function(rst){
+				sendResponse({code:200, data:rst, msg:'success'});
+			});
+			break;
+		case 'setCache':
+			setCache(request.cache_key, request.value, request.expire, function(rst) {
+				sendResponse({code:200, data:rst, msg:'success'});
+			});
+			break;
+		case 'getUrl':
+			sendResponse({code:200, data:api_url, msg:'success'});
+			break;
+		case 'initSocket':
+			SOCKET.init(request.key, sendResponse);
+			break;
+		case 'sotpSocket':
+			SOCKET.logout(request.key, sendResponse);
+			break;
+		case 'setSocket':
+			SOCKET.set(request.value, sendResponse);
+			break;
 	}
-);
-//生成唯一ID字符串
-function randString(len) {
-	let arr = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
-	let str = '';
-	for (let i=0; i<len; ++i) {
-		str += arr[Math.round(Math.random()*(arr.length-1))];
-	}
-	return str;
 }
 //设置缓存
-function setCache(key, value, expire) {
+function setCache(key, value, expire, callback) {
 	if (expire !== -1) {
 		expire = now() + expire;
 	}
 	const data = {expire:expire, content:value};
-	chrome.storage.local.set({[key]:data});
+	chrome.storage.local.set({[key]:data}, callback);
 }
 //获取缓存
 function getCache(key, callback) {
@@ -44,6 +68,8 @@ function getCache(key, callback) {
 		} else if (result[key].expire <= now()) {
 			delCache(key);
 			callback(false);
+		} else {
+			callback(result[key].content);
 		}
 	});
 }
@@ -84,3 +110,37 @@ function getApi(url, param, callback, type) {
 		return false;
 	});
 }
+const SOCKET = {
+	init: function(type, callback) {
+		const _this = this;
+		if (_this.ioLoginSign) {
+			return;
+		}
+		getCache('helper_all_data_cache', function(config){
+			if (!config) {
+				callback({code:400, data: false, msg:'无配置数据'});
+				return false;
+			}
+			_this.type = type;
+			_this.ioLoginSign = false;
+			_this.socket = new WebSocket(config.socket_domain);
+		});
+	},
+	logout: function(type, callback){
+
+	},
+	set: function(param, callback) {
+
+	},
+	ioPing: function() {
+		const _this = this;
+		clearInterval(_this.ioPingHandler);
+		_this.ioPingHandler = setInterval(function() {
+			if(_this.ioLoginSign) {
+				_this.sendMessage('ioPing', 'ping');
+			} else {
+				clearInterval(_this.ioPingHandler);
+			}
+		}, 20000);
+	},
+};

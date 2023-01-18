@@ -36,6 +36,9 @@
 		"webRequest"
 	],
 	"host_permissions": [
-		"https://erp.baycheer.cn/*"
-	]
+		"*://*.admin.cn/*"
+	],
+	"content_security_policy": {
+		"extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+	}
 }
