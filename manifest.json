@@ -30,6 +30,9 @@
 		],
 		"all_frames": false
 	}],
+	"externally_connectable": {
+		"matches": ["*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*"]
+	},
 	"permissions": [
 		"tabs",
 	    "cookies",

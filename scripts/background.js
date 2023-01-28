@@ -5,8 +5,15 @@ chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         listenerResponse(request, sender, sendResponse);
         return true;
-    });
-
+    }
+);
+//监听页面通信 - 跨扩展消息
+chrome.runtime.onMessageExternal.addListener(
+    function(request, sender, sendResponse) {
+        listenerResponse(request, sender, sendResponse);
+        return true;
+    }
+);
 function listenerResponse(request, sender, sendResponse) {
     switch (request.action) {
         case 'request':
@@ -95,13 +102,13 @@ const SOCKET = {
             return;
         }
         getCache('helper_all_data_cache', function(config) {
-            if (!config) {
+            if (config) {
+                _this.type = type;
+                _this.ioLoginSign = false;
+                _this.socket = new WebSocket(config.socket_domain);
+            } else {
                 callback({ code: 400, data: false, msg: '无配置数据'});
-                return false;
             }
-            _this.type = type;
-            _this.ioLoginSign = false;
-            _this.socket = new WebSocket(config.socket_domain);
         });
     },
     logout: function(type, callback) {
