@@ -17,8 +17,6 @@ function loadStatic(action, value, version) {
 					let script = document.createElement('script');
 					script.type = 'text/javascript';
 					script.src = url;
-					script.setAttribute('crossorigin', 'anonymous');
-					script.setAttribute('referrerpolicy', 'unsafe-url');
 					obj.appendChild(script);
 					break;
 			}
