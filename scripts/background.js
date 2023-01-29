@@ -10,9 +10,51 @@ const SOCKET = {
             if (config) {
                 _this.type = type;
                 _this.ioLoginSign = false;
-                // _this.socket = new WebSocket(config.socket_domain);
-                _this.socket = new WebSocket('wss://shop.admin.cn/socket.io/');
-
+                _this.socket = io(config.socket_domain);
+                //连接成功->注册
+                _this.socket.on('connect', function(){
+                    //注册
+                    console.log('注册...')
+                    _this.ioRegister(config);
+                });
+                //断开
+                _this.socket.on('disconnect', function(){
+                    //重新重连
+                    console.log('断开...')
+                    _this.reConnect();
+                });
+                //注册成功
+                _this.socket.on('registerSuccess', function(e) {
+                    console.log('注册成功...')
+                    _this.ioRegisterSign = true;
+                    _this.ioPing();
+                });
+                //心跳接收
+                _this.socket.on('ioPong', function(e) {
+                    // console.log('心跳响应...')
+                });
+                //注册失败 断开连接
+                _this.socket.on('ioClose', function(e) {
+                    console.log('注册失败...')
+                    _this.reConnect();
+                });
+                //接收处理请求
+                _this.socket.on('autoDeal', function(e) {
+                    //储存数据
+                    CACHE.setCache('baycheerhelper_auto_robot_autodeal_data', e, -1);
+                    CACHE.setCache('baycheerhelper_current_link', e.entry_url, -1);
+                    //url刷新页面
+                    chrome.tabs.query({}, function(tabArray){
+                        chrome.tabs.update(tabArray[0].id, { url: e.entry_url });
+                    });
+                });
+                //接收处理成功
+                _this.socket.on('dealSuccess', function(e) {
+                    //清除任务缓存
+                    CACHE.delCache('baycheerhelper_auto_robot_autodeal_data');
+                });
+                //处理失败
+                _this.socket.on('dealFailed', function(e) {});
             } else {
                 callback({ code: 400, data: false, msg: '无配置数据'});
             }
@@ -165,4 +207,3 @@ function getApi(url, param, callback, type) {
         callback({ code: 500, msg: error.message});
     });
 }
-SOCKET.init();

@@ -19,7 +19,7 @@
 		"128": "images/icon-128.png"
 	},
 	"background": {
-		"scripts": ["scripts/background.js"]
+		"scripts": ["scripts/socket.io.js", "scripts/background.js"]
 	},
 	"content_scripts": [{
 		"js": ["scripts/content.js"],
@@ -36,6 +36,7 @@
 	"permissions": [
 		"tabs",
 	    "cookies",
-	    "webRequest"
+	    "webRequest",
+	    "*://shop.admin.cn/*"
 	]
 }
