@@ -1,4 +1,4 @@
-chrome.runtime.sendMessage({action: 'request', value: 'api/getHelperData', cache_key: 'helper_all_data_cache'}, function(res) {
+chrome.runtime.sendMessage({action: 'request', value: 'api/helperData', cache_key: 'helper_all_data_cache'}, function(res) {
 	if (res.code === 200) {
 		let version = res.data.version;
 		localStorage.setItem('helper_extid', chrome.runtime.id);

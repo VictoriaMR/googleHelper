@@ -14,57 +14,41 @@ const SOCKET = {
                 //连接成功->注册
                 _this.socket.on('connect', function(){
                     //注册
-                    console.log('注册...')
-                    _this.ioRegister(config);
+                    console.log('已链接...')
+                    //维持心跳开始
+                    _this.ioPing();
                 });
                 //断开
                 _this.socket.on('disconnect', function(){
                     //重新重连
-                    console.log('断开...')
+                    console.log('已断开...')
                     _this.reConnect();
-                });
-                //注册成功
-                _this.socket.on('registerSuccess', function(e) {
-                    console.log('注册成功...')
-                    _this.ioRegisterSign = true;
-                    _this.ioPing();
                 });
                 //心跳接收
                 _this.socket.on('ioPong', function(e) {
-                    // console.log('心跳响应...')
-                });
-                //注册失败 断开连接
-                _this.socket.on('ioClose', function(e) {
-                    console.log('注册失败...')
-                    _this.reConnect();
+                    console.log('心跳响应...')
                 });
                 //接收处理请求
-                _this.socket.on('autoDeal', function(e) {
-                    //储存数据
-                    CACHE.setCache('baycheerhelper_auto_robot_autodeal_data', e, -1);
-                    CACHE.setCache('baycheerhelper_current_link', e.entry_url, -1);
+                _this.socket.on('deal', function(e) {
                     //url刷新页面
                     chrome.tabs.query({}, function(tabArray){
                         chrome.tabs.update(tabArray[0].id, { url: e.entry_url });
                     });
                 });
-                //接收处理成功
-                _this.socket.on('dealSuccess', function(e) {
-                    //清除任务缓存
-                    CACHE.delCache('baycheerhelper_auto_robot_autodeal_data');
-                });
-                //处理失败
-                _this.socket.on('dealFailed', function(e) {});
             } else {
                 callback({ code: 400, data: false, msg: '无配置数据'});
             }
         });
     },
     logout: function(type, callback) {
-
+        if (this.socket) {
+            this.ioLoginSign = false;
+            clearInterval(this.ioPingHandler);
+            this.socket.emit('close');
+        }
     },
     set: function(param, callback) {
-
+        this.socket.emit(type, data);
     },
     ioPing: function() {
         const _this = this;
@@ -77,6 +61,9 @@ const SOCKET = {
             }
         }, 20000);
     },
+    reConnect: function() {
+        
+    }
 };
 const CACHE = {
     getCache: function(key, callback) {
@@ -115,18 +102,18 @@ const CACHE = {
 //扩展内通信
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
-        listenerResponse(request, sender, sendResponse);
+        listenerResponse(request, sendResponse);
         return true;
     }
 );
 //监听页面通信 - 跨扩展消息
 chrome.runtime.onMessageExternal.addListener(
     function(request, sender, sendResponse) {
-        listenerResponse(request, sender, sendResponse);
+        listenerResponse(request, sendResponse);
         return true;
     }
 );
-function listenerResponse(request, sender, sendResponse) {
+function listenerResponse(request, sendResponse) {
     switch (request.action) {
         case 'request':
             if (request.cache_key) {
@@ -139,11 +126,11 @@ function listenerResponse(request, sender, sendResponse) {
                                 setCache(request.cache_key, res.data, request.expire);
                             }
                             sendResponse(res);
-                        }, request.type);
+                        });
                     }
                 });
             } else {
-                getApi(api_url + request.value, request.param, sendResponse, request.type);
+                getApi(api_url + request.value, request.param, sendResponse);
             }
             break;
         case 'getCache':
@@ -155,6 +142,19 @@ function listenerResponse(request, sender, sendResponse) {
             setCache(request.cache_key, request.value, request.expire, function(rst) {
                 sendResponse({ code: 200, data: rst, msg: 'success'});
             });
+            break;
+        case 'hSetCache':
+            getCache(request.cache_key, function(rst){
+                if (!rst) rst = {};
+                rst[request.key] = request.value;
+                setCache(request.cache_key, rst, request.expire, function(rst) {
+                    sendResponse({ code: 200, data: rst, msg: 'success'});
+                });
+            });
+            break;
+        case 'delCache':
+            delCache(request.cache_key);
+            sendResponse({ code: 200, data: true, msg: 'success'});
             break;
         case 'getUrl':
             sendResponse({ code: 200, data: api_url, msg: 'success'});
@@ -183,24 +183,15 @@ function delCache(key) {
    CACHE.delCache(key);
 }
 //api请求
-function getApi(url, param, callback, type) {
-    let init = {};
-    if (type == 'GET') {
-        let strArr = new Array();
-        for (let i in param) {
-            strArr.push(i + '=' + param[i]);
-        }
-        if (strArr.length > 0) {
-            url += url + '?' + strArr.join('&');
-        }
-    } else {
-        let formData = new FormData();
-        for (let i in param) {
-            formData.append(i, param[i]);
-        }
-        init.method = 'POST';
-        init.body = formData;
-    }
+function getApi(url, param, callback) {
+    let init = {
+        method: 'POST',
+        headers: {
+            'Content-Type':'application/x-www-form-urlencoded',
+            'x-requested-with':'XMLHttpRequest'
+        },
+        body: Qs.stringify(param)
+    };
     fetch(url, init).then(response => response.json()).then(data => {
         callback(data);
     }).catch((error) => {

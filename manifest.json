@@ -1,8 +1,8 @@
 {
 	"manifest_version": 2,
-	"name": "产品数据助手",
+	"name": "产品助手",
 	"version": "2.0",
-	"description": "供应商产品数据助手",
+	"description": "阿里巴巴供应商产品助手",
 	"browser_action": {
 		"default_popup": "popup/popup.html",
 		"default_icon": {
@@ -19,24 +19,19 @@
 		"128": "images/icon-128.png"
 	},
 	"background": {
-		"scripts": ["scripts/socket.io.js", "scripts/background.js"]
+		"scripts": ["scripts/socket.js", "scripts/qs.js", "scripts/background.js"]
 	},
 	"content_scripts": [{
-		"js": ["scripts/content.js"],
-		"matches": [
-			"*://*.1688.com/*",
-			"*://*.tmall.com/*",
-			"*://*.taobao.com/*"
-		],
-		"all_frames": false
-	}],
-	"externally_connectable": {
-		"matches": ["*://*.1688.com/*","*://*.tmall.com/*","*://*.taobao.com/*"]
-	},
-	"permissions": [
-		"tabs",
-	    "cookies",
-	    "webRequest",
-	    "*://shop.admin.cn/*"
-	]
+        "matches": ["*://*/*"],
+        "js": ["scripts/content.js"],
+        "all_frames": false
+    }],
+    "permissions": [
+        "tabs",
+        "cookies",
+        "*://*/*"
+    ],
+    "externally_connectable": {
+        "matches": ["*://*/*"]
+    }
 }

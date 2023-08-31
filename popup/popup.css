@@ -1,63 +1,13 @@
-body {
-    width: 220px;
-    padding: 20px;
-    background: #f1f1f1;
-    text-align: center
-}
-
-.setting-content {
-    display: flex;
-    margin-bottom: 15px
-}
-
-.setting-content:last-child {
-    margin-bottom: 0
-}
-
-.setting-content .setting-title {
-    font-size: 16px;
-    font-weight: 600;
-    width: 110px;
-    text-align: right
-}
-
-.switch-p {
-    width: 40px;
-    height: 20px;
-    border-radius: 10px;
-    position: relative;
-    margin-left: 20px;
-    cursor: pointer
-}
-
-.switch-s {
-    width: 18px;
-    height: 18px;
-    overflow: hidden;
-    border-radius: 9px;
-    position: absolute;
-    background: white;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4)
-}
-
-.switch-p[data-status="open"] {
-    background: rgba(0, 184, 0, 0.8);
-    border: 1px solid #f1f1f1;
-}
-
-.switch-p[data-status="open"] .switch-s {
-    top: 1px;
-    right: 0px
-}
-
-.switch-p[data-status="close"] {
-    background: rgba(255, 255, 255, 0.4);
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-left: transparent
-}
-
-.switch-p[data-status="close"] .switch-s {
-    left: 0;
-    top: 0;
-    border: 1px solid rgba(0, 0, 0, 0.1)
-}
+body{width:220px;padding:0 10px 10px 10px;background:#f1f1f1;text-align:center}
+h2{text-align:center;margin:18px 0 30px 0}
+button{width:100%;padding:10px;border:none;background-color:#000;color:#fff;font-size:14px;line-height:20px;margin-top:30px;cursor:pointer;outline:0;border-radius:4px}
+button:active{outline:0}
+.setting-content{display:flex;margin-bottom:15px}
+.setting-content:last-child{margin-bottom:0}
+.setting-content .setting-title{font-size:16px;font-weight:600;width:110px;text-align:right}
+.switch-p{width:40px;height:20px;border-radius:10px;position:relative;margin-left:20px;cursor:pointer}
+.switch-s{width:18px;height:18px;overflow:hidden;border-radius:9px;position:absolute;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.4)}
+.switch-p[data-status=open]{background:rgba(0,184,0,.8);border:1px solid #f1f1f1}
+.switch-p[data-status=open] .switch-s{top:1px;right:0}
+.switch-p[data-status=close]{background:rgba(255,255,255,.4);border:1px solid rgba(0,0,0,.15);border-left:transparent}
+.switch-p[data-status=close] .switch-s{left:0;top:0;border:1px solid rgba(0,0,0,.1)}
