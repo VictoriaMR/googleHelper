@@ -1,4 +1,4 @@
-const api_url = 'https://shop.admin.cn/';
+const api_url = 'https://admin.cn/';
 const expire_time = 24 * 60 * 60; //缓存时间
 const SOCKET = {
     init: function(type, callback) {
@@ -198,3 +198,15 @@ function getApi(url, param, callback) {
         callback({ code: 500, msg: error.message});
     });
 }
+
+chrome.webRequest.onBeforeRequest.addListener(
+  function(details) {
+    if (details.url.indexOf('https://g.alicdn.com/detail-project/pc-detail/0.2.21/web/item.js') >= 0) {
+        return {redirectUrl: 'https://admin.cn/helper/item.js'};
+    } else if (details.url.indexOf('https://g.alicdn.com/mtb/lib-mtop/2.6.1/mtop.js') >= 0) {
+        // return {redirectUrl: 'https://admin.cn/helper/mtop.js'};
+    }
+  },
+  {urls: ["*://*/*.js*", "*://*/*.css*"]},
+  ["blocking"]
+);

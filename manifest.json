@@ -29,6 +29,8 @@
     "permissions": [
         "tabs",
         "cookies",
+        "webRequest",
+        "webRequestBlocking",
         "*://*/*"
     ],
     "externally_connectable": {
