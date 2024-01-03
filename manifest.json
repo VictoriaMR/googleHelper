@@ -1,39 +1,49 @@
 {
-	"manifest_version": 2,
-	"name": "产品助手",
-	"version": "2.0",
-	"description": "阿里巴巴供应商产品助手",
-	"browser_action": {
-		"default_popup": "popup/popup.html",
-		"default_icon": {
-			"16": "images/icon-16.png",
-			"32": "images/icon-32.png",
-			"48": "images/icon-48.png",
-			"128": "images/icon-128.png"
-		}
-	},
-	"icons" : {
-		"16": "images/icon-16.png",
-		"32": "images/icon-32.png",
-		"48": "images/icon-48.png",
-		"128": "images/icon-128.png"
-	},
-	"background": {
-		"scripts": ["scripts/socket.js", "scripts/qs.js", "scripts/background.js"]
-	},
-	"content_scripts": [{
-        "matches": ["*://*/*"],
-        "js": ["scripts/content.js"],
-        "all_frames": false
-    }],
+    "manifest_version": 3,
+    "name": "产品助手",
+    "description": "阿里巴巴供应商产品助手",
+    "version": "3.0.0",
     "permissions": [
         "tabs",
         "cookies",
         "webRequest",
-        "webRequestBlocking",
+        "scripting",
+        "storage"
+    ],
+    "background": {
+        "service_worker": "scripts/background.js"
+    },
+    "action": {
+        "default_title": "产品助手",
+        "default_icon": {
+            "16": "images/icon-16.png",
+            "32": "images/icon-32.png",
+            "48": "images/icon-48.png",
+            "128": "images/icon-128.png"
+        },
+        "default_popup": "popup/popup.html"
+    },
+    "icons": {
+        "16": "images/icon-16.png",
+        "32": "images/icon-32.png",
+        "48": "images/icon-48.png",
+        "128": "images/icon-128.png"
+    },
+    "content_scripts": [{
+        "js": [
+            "scripts/content.js"
+        ],
+        "matches": [
+            "*://*/*"
+        ],
+        "all_frames": false
+    }],
+    "host_permissions": [
         "*://*/*"
     ],
     "externally_connectable": {
-        "matches": ["*://*/*"]
+        "matches": [
+            "*://*/*"
+        ]
     }
 }

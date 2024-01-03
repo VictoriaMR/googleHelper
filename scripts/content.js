@@ -1,16 +1,17 @@
-chrome.runtime.sendMessage({action: 'request', value: 'api/helperData', cache_key: 'helper_all_data_cache'}, function(res) {
-	if (res.code === 200) {
-		let version = res.data.version;
-		localStorage.setItem('helper_extid', chrome.runtime.id);
-		chrome.runtime.sendMessage({action: 'getUrl'}, function(res) {
-			if (res.data) {
-				let script = document.createElement('script');
-				script.type = 'text/javascript';
-				script.src = res.data+'helper/init.js?v='+version;;
-				document.querySelector('head').appendChild(script);
+// 储存当前扩展ID
+localStorage.setItem('baycheerhelper_extid', chrome.runtime.id);
+// 初始化页面
+chrome.runtime.sendMessage({action: 'getCache', cache_key: 'helper_action_status'}, function(res){
+	if (res.data) {
+		for (let i in res.data) {
+			if (res.data[i] == 1) {
+				chrome.runtime.sendMessage({action: 'init'});
+				break;
 			}
-		});
-	} else {
-		alert('helper_error: '+res.msg);
+		}
 	}
+});
+//接收backgroup通信
+chrome.runtime.onMessage.addListener((request , sender , sendResponse) => {
+    window.postMessage(request, "*");
 });
