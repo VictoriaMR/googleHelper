@@ -6,9 +6,9 @@
     "permissions": [
         "tabs",
         "cookies",
-        "webRequest",
+        "storage",
         "scripting",
-        "storage"
+        "webRequest"
     ],
     "background": {
         "service_worker": "scripts/background.js"

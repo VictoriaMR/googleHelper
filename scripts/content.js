@@ -1,5 +1,5 @@
 // 储存当前扩展ID
-localStorage.setItem('baycheerhelper_extid', chrome.runtime.id);
+localStorage.setItem('helper_extid', chrome.runtime.id);
 // 初始化页面
 chrome.runtime.sendMessage({action: 'getCache', cache_key: 'helper_action_status'}, function(res){
 	if (res.data) {

@@ -18,12 +18,14 @@ async function listenerEvent(request) {
     switch (request.action) {
         case 'init':
             let [tab] = await chrome.tabs.query({active:true, lastFocusedWindow:true});
-            // 注入初始化js
-            chrome.scripting.executeScript({
-                target: {tabId: tab.id},
-                files: ['scripts/init.js'],
-                world: 'MAIN'
-            });
+            if (tab) {
+                // 注入初始化js
+                chrome.scripting.executeScript({
+                    target: {tabId: tab.id},
+                    files: ['scripts/init.js'],
+                    world: 'MAIN'
+                });
+            }
             break;
         case 'request':
             if (request.cache_key) {
@@ -69,12 +71,11 @@ async function listenerEvent(request) {
     }
     return rst;
 }
-// 监听替换
-chrome.webRequest.onBeforeRequest.addListener(
-    function(details) {
-        if (details.url.indexOf('detail-project/pc-detail/0.2.21/web/item.js') >= 0) {
-            return {redirectUrl: api_url+'helper/item.js'};
+chrome.webRequest.onCompleted.addListener((content) => {
+    console.log(content, 'content')
+        if (content && content.tabId) {
+            chrome.tabs.sendMessage(content.tabId, {action:"detail-url", data: content});
         }
     },
-    {urls: ["*://*/*.js*"]}
+    {urls: ["https://*/*/mtop.taobao.pcdetail.data.get/*"]}
 );

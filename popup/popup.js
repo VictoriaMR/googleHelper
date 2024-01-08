@@ -31,7 +31,6 @@ window.onload = function() {
 			document.getElementById('function-content').innerHTML = html;
 			//按钮初始化
 			chrome.runtime.sendMessage({action: 'getCache', cache_key: 'helper_action_status'}, function(res){
-					console.log(res.data, 'res.data')
 				if (res.data) {
 					for (let i in res.data) {
 						let obj = document.getElementById(i);
