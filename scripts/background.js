@@ -71,11 +71,3 @@ async function listenerEvent(request) {
     }
     return rst;
 }
-chrome.webRequest.onCompleted.addListener((content) => {
-    console.log(content, 'content')
-        if (content && content.tabId) {
-            chrome.tabs.sendMessage(content.tabId, {action:"detail-url", data: content});
-        }
-    },
-    {urls: ["https://*/*/mtop.taobao.pcdetail.data.get/*"]}
-);
