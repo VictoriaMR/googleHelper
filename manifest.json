@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "产品助手",
     "description": "阿里巴巴供应商产品助手",
-    "version": "3.0.0",
+    "version": "3.1.1",
     "permissions": [
         "tabs",
         "cookies",
@@ -30,12 +30,33 @@
         "128": "images/icon-128.png"
     },
     "content_scripts": [{
+        "world": "MAIN",
+        "js": [
+            "scripts/init.js"
+        ],
+        "matches": [
+            "*://*/*"
+        ],
+        "run_at": "document_start",
+        "all_frames": false
+    },{
         "js": [
             "scripts/content.js"
         ],
         "matches": [
             "*://*/*"
         ],
+        "run_at": "document_start",
+        "all_frames": false
+    },{
+        "world": "MAIN",
+        "js": [
+            "scripts/load.js"
+        ],
+        "matches": [
+            "*://*/*"
+        ],
+        "run_at": "document_end",
         "all_frames": false
     }],
     "host_permissions": [

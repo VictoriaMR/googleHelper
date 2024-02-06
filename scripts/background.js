@@ -13,26 +13,18 @@ chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => 
     listenerEvent(request).then(sendResponse);
     return true;
 });
-async function listenerEvent(request) {
+const listenerEvent = async(request, sender) => {
     let rst;
     switch (request.action) {
-        case 'init':
-            let [tab] = await chrome.tabs.query({active:true, lastFocusedWindow:true});
-            if (tab) {
-                // 注入初始化js
-                chrome.scripting.executeScript({
-                    target: {tabId: tab.id},
-                    files: ['scripts/init.js'],
-                    world: 'MAIN'
-                });
-            }
-            break;
         case 'request':
             if (request.cache_key) {
                 rst = await getCache(request.cache_key);
             }
             if (!rst) {
-                rst = await getApi(api_url + request.value, request.param);
+                if (request.value.substr(0, 4) != 'http') {
+                    request.value = api_url + '/api/' + request.value;
+                }
+                rst = await getApi(request.value, request.param);
                 if (request.cache_key && rst && rst.data) {
                     await setCache(request.cache_key, rst.data, request.expire);
                 }
@@ -57,13 +49,13 @@ async function listenerEvent(request) {
             rst = api_url;
             break;
         case 'initSocket':
-            
+            rst = await socketInit(sender);
             break;
-        case 'sotpSocket':
-            
+        case 'stopSocket':
+            rst = await socketClose();
             break;
         case 'setSocket':
-            
+            rst = await updateSocketConfig();
             break;
     }
     if (typeof rst != 'object' || !rst.code) {
