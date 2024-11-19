@@ -22,7 +22,7 @@ const listenerEvent = async(request, sender) => {
             }
             if (!rst) {
                 if (request.value.substr(0, 4) != 'http') {
-                    request.value = api_url + '/api/' + request.value;
+                    request.value = api_url + request.value;
                 }
                 rst = await getApi(request.value, request.param);
                 if (request.cache_key && rst && rst.data) {
@@ -59,7 +59,7 @@ const listenerEvent = async(request, sender) => {
             break;
     }
     if (typeof rst != 'object' || !rst.code) {
-        rst = {code: 200, data: rst, msg: rst ? 'success' : 'fail'};
+        rst = {code: 1, data: rst, msg: rst ? 'success' : 'fail'};
     }
     return rst;
 }

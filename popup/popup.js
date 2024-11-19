@@ -17,7 +17,7 @@ chrome.runtime.sendMessage({action:'getCache', cache_key:'uuid'}, function(res) 
 });
 window.onload = function() {
 	chrome.runtime.sendMessage({action: 'request', value: 'api/helperData', cache_key: 'helper_all_data_cache'}, function(res) {
-		if (res && res.code == 200) {
+		if (res && res.code) {
 			let html = '';
 			let action = res.data.action;
 			for (let i=0;i<action.length;i++) {
@@ -46,7 +46,7 @@ window.onload = function() {
 				obj[i].onclick = function(){
 					let status = this.getAttribute('data-status')=='close'?1:0;
 					chrome.runtime.sendMessage({action: 'hSetCache', cache_key: 'helper_action_status', key:id, value:status, expire:-1}, function(res){
-						if (res.code == 200) {
+						if (res.code) {
 							obj[i].setAttribute('data-status', status==1?'open':'close');
 						}
 						chrome.tabs.reload();
