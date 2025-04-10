@@ -32,7 +32,11 @@ const getApi = async (url, param, callback, type, dataType, headers) => {
     }
     const response = await fetch(url, init);
     if (response.ok) {
-    	return await response[dataType]();
+        try {
+            return await response[dataType]();
+        } catch(e) {
+            return {code: '400', data: '', msg: '请求失败, '+e};
+        }
 	}
-	return {code: response.status, data: '', msg: '请求失败, 请和管理人员联系.'+response.status+': '+response.statusText};
+	return {code: response.status, data: '', msg: '请求失败, '+response.status+': '+response.statusText};
 }
