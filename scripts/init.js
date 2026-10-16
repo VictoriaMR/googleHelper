@@ -4,9 +4,13 @@ if (location.hostname.indexOf('login') < 0) {
     //设置全局数据储存
     const setCustomerAjaxRespone = async(data) => {
         if (data && typeof data != 'object') {
-            data = data.match(/{.+}/);
+            data = String(data).match(/\{[\s\S]+\}/);
             if (data && data[0]) {
-                data = JSON.parse(data[0]);
+                try {
+                    data = JSON.parse(data[0]);
+                } catch (e) {
+                    data = null;
+                }
             }
         }
         data && JSON.stringify(data) != '{}' && window.customerAjaxRespone.push(data);
@@ -30,14 +34,7 @@ if (location.hostname.indexOf('login') < 0) {
         var oldXHR = window.XMLHttpRequest;
         function newXHR() {
             var realXHR = new oldXHR();
-            // realXHR.addEventListener('abort', function(){ajaxEventTrigger.call(this, 'ajaxAbort');}, false);
-            // realXHR.addEventListener('error', function(){ajaxEventTrigger.call(this, 'ajaxError');}, false);
-            // realXHR.addEventListener('load', function(){ajaxEventTrigger.call(this, 'ajaxLoad');}, false);
-            // realXHR.addEventListener('loadstart', function(){ajaxEventTrigger.call(this, 'ajaxLoadStart');}, false);
-            // realXHR.addEventListener('progress', function(){ajaxEventTrigger.call(this, 'ajaxProgress');}, false);
-            // realXHR.addEventListener('timeout', function(){ajaxEventTrigger.call(this, 'ajaxTimeout');}, false);
             realXHR.addEventListener('loadend', function(){ajaxEventTrigger.call(this, 'ajaxLoadEnd');}, false);
-            // realXHR.addEventListener('readystatechange', function(){ajaxEventTrigger.call(this, 'ajaxReadyStateChange');}, false);
             return realXHR;
         }
         window.XMLHttpRequest = newXHR;
@@ -46,31 +43,48 @@ if (location.hostname.indexOf('login') < 0) {
                 setCustomerAjaxRespone(e.detail.responseText);
             }
         });
+        if (typeof window.fetch === 'function') {
+            const originalFetch = window.fetch;
+            window.fetch = function() {
+                return originalFetch.apply(this, arguments).then(response => {
+                    const clone = response.clone();
+                    clone.text().then(data => {
+                        setCustomerAjaxRespone(data);
+                    }).catch(() => {});
+                    return response;
+                });
+            };
+        }
     })();
     // jsonp监听事件
     ;(function () {
         var originalCreateElement = document.createElement;
         function changeReqLink (script) {
-            let src = script.src;
-            Object.defineProperty(script, 'src', {
-                get: function () {
-                    return src;
-                },
-                set: function (oSrc) {
-                    src = oSrc;
-                    script.setAttribute('src', oSrc);
-                }
-            });
+            const desc = Object.getOwnPropertyDescriptor(script, 'src');
+            if (!desc || desc.configurable) {
+                let src = script.src;
+                Object.defineProperty(script, 'src', {
+                    get: function () {
+                        return src || script.getAttribute('src') || '';
+                    },
+                    set: function (oSrc) {
+                        src = oSrc;
+                        script.setAttribute('src', oSrc);
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+            }
             const originalSetAttribute = script.setAttribute;
             script.setAttribute = function () {
                 const args = Array.prototype.slice.call(arguments);
-                if (args[0] == 'src') {
-                    const tmpMatch = args[1].match(/(?<=(callback=))([^&]*)(?=&|$)/);
+                if (args[0] == 'src' && args[1]) {
+                    const tmpMatch = String(args[1]).match(/(?<=(callback=))([^&]*)(?=&|$)/);
                     if (tmpMatch && tmpMatch[0]) {
                         listenerObjChange(tmpMatch[0]);
                     }
                 }
-                originalSetAttribute.call(script, ...args);
+                return originalSetAttribute.call(script, ...args);
             }
         }
         // 创建标签监听
@@ -90,18 +104,27 @@ if (location.hostname.indexOf('login') < 0) {
                         return val;
                     },
                     set : function(newVal){
-                        if (typeof newVal == 'function') {
+                        if (typeof newVal == 'function' && !newVal.__hooked) {
                             const oldVal = newVal;
                             newVal = function(data) {
                                 setCustomerAjaxRespone(data);
-                                oldVal(data);
-                            }
+                                return oldVal.apply(this, arguments);
+                            };
+                            newVal.__hooked = true;
                         }
                         val = newVal;
                     },
                     enumerable : true,
                     configurable : true
                 });
+            } else if (typeof window[name] === 'function' && !window[name].__hooked) {
+                const oldVal = window[name];
+                const wrapped = function(data) {
+                    setCustomerAjaxRespone(data);
+                    return oldVal.apply(this, arguments);
+                };
+                wrapped.__hooked = true;
+                window[name] = wrapped;
             }
         }
     })();

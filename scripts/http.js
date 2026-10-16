@@ -30,13 +30,17 @@ const getApi = async (url, param, callback, type, dataType, headers) => {
             init.headers[i] = headers[i]
         }
     }
-    const response = await fetch(url, init);
-    if (response.ok) {
-        try {
-            return await response[dataType]();
-        } catch(e) {
-            return {code: '400', data: '', msg: '请求失败, '+e};
+    try {
+        const response = await fetch(url, init);
+        if (response.ok) {
+            try {
+                return await response[dataType]();
+            } catch(e) {
+                return {code: 0, data: '', msg: '响应解析失败: ' + e};
+            }
         }
-	}
-	return {code: response.status, data: '', msg: '请求失败, '+response.status+': '+response.statusText};
+        return {code: response.status, data: '', msg: '请求失败, ' + response.status + ': ' + response.statusText};
+    } catch (e) {
+        return {code: 0, data: '', msg: '网络请求失败: ' + e.message};
+    }
 }

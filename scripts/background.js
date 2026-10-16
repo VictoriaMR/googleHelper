@@ -58,7 +58,7 @@ const listenerEvent = async(request, sender) => {
             rst = await updateSocketConfig();
             break;
     }
-    if (typeof rst != 'object' || !rst.code) {
+    if (typeof rst != 'object' || !rst || typeof rst.code == 'undefined') {
         rst = {code: 1, data: rst, msg: rst ? 'success' : 'fail'};
     }
     return rst;
